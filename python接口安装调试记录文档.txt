@@ -1,0 +1,69 @@
+1、安装软件
+sudo apt-get install build-essential libssl-dev libffi-dev python3-dev
+
+2、创建虚拟环境
+mkdir /var/pyvenv
+cd /var/pyvenv
+python -m venv myvenv
+
+3、执行进入虚拟环境
+source pyenv_name/bin/activate
+
+4、在虚拟环境中升级pip，安装所有需要的库
+pip install --upgrade pip
+
+pip install wheel
+pip install flask
+pip install tensorflow==2.5.0
+pip install joblib
+pip install numpy
+pip install sklearn
+pip install uwsgi
+
+5、上传项目的tar包，解压
+
+6、在pyvenv的目录下，写配置文件uwsgi.ini
+[uwsgi]
+
+#单独做web服务时启用
+#http=0.0.0.0:8877
+
+#nginx时使用
+socket = 0.0.0.0:8877
+
+#项目路径
+chdir=/var/pyvenv
+
+#启动文件
+wsgi-file=/var/pyvenv/server.py
+
+#启动项目名
+callable=app
+
+#日志输出目录
+daemonize = /var/pyvenv/logs/uwsgi.log
+
+#主进程保存
+pidfile = /var/pyvenv/logs/pid_uwsgi.pid
+
+
+7、在虚拟环境中，pyvenv的目录下启动uwsgi，-d后台启动 --ini 导入配置的ini
+uwsgi -d --ini uwsgi.ini
+
+8、配置nginx
+
+server {
+listen 8877;
+server_name localhost
+charset utf-8;
+
+location / {
+include uwsgi_params;
+uwsgi_pass 101.34.185.210:8877;
+#uwsgi_param UWSGI_SCRIPT analysis_platform.wsgi;
+#uwsgi_param UWSGI_CHDIR /var/pyvenv/; #项目路径
+}
+location /static/ {
+alias /var/pyvenv/app/static/; #静态资源路径
+}
+}
