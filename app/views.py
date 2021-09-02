@@ -1,8 +1,7 @@
 from app import app
-import os,json,joblib
+import os,json
 import numpy as np
 from flask import  request,jsonify
-import tensorflow.compat.v1 as tf
 from app.predict import * # 导入predict.py，内有转换json坐标与计算坐标的函数
 
 

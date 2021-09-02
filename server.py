@@ -1,9 +1,10 @@
 from app import app
 
 
-app = app('app')
-
-
 if __name__ == '__main__':
 
-	app.run(debug=True, port=8777)
+	# 测试时的启动方式
+	# app.run(debug=True, port=8777) 
+
+	#uwsgi的启动方式
+	app.run(debug=False)
