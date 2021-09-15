@@ -1,5 +1,5 @@
 from app import app
-import os,json
+import os,json,main
 import numpy as np
 from flask import  request,jsonify
 from app.predict import * # 导入predict.py，内有转换json坐标与计算坐标的函数
@@ -26,8 +26,18 @@ def point_calculate():
     # 将计算用的坐标传入函数中计算坐标值并返回
     points= np.array(point_list).reshape(1, -1)
     point_lists = ble_predict(points)[0]
-    test_dict = {"x":float(point_lists[0]),"y":float(point_lists[1])}
+
+    board = displayboard(point_lists)
+
+    test_dict = {"x":float(point_lists[0]),"y":float(point_lists[1]),"board":str(board)}
 
     return  jsonify(test_dict)
 
+@app.route('/worker',methods=["POST"])
+def point_worker():
+    get_data=request.data.decode('utf-8')
+    get_data = json.loads(get_data)
+    worker = main.Worker()
+    position = worker.Run(get_data)
 
+    return jsonify(position)

@@ -1,0 +1,15 @@
+byProgram
+floor,1,plan_2.jpg
+height,4.5
+start,0
+start_point,385.5,138.0
+dir,-0.258254399763
+scale,0.008437
+node,node.txt
+link,link.txt
+arrow,arrow.txt
+polygon,polygon.txt
+nodeID,212
+linkID,122
+arrowID,1
+polygonID,32
