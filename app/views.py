@@ -1,8 +1,10 @@
+# -*- coding:utf-8 -*-
 from app import app
-import os,json,main
+import os,json,joblib,random,codecs
 import numpy as np
 from flask import  request,jsonify
-from app.predict import * # 导入predict.py，内有转换json坐标与计算坐标的函数
+# import tensorflow.compat.v1 as tf
+from .main import * 
 
 
 
@@ -13,31 +15,52 @@ with open(json_path,'r',encoding="utf-8") as point:
     point_datas = json.load(point)
     point.close()
 
+def list_of_groups(init_list, children_list_len):
+    list_of_groups = zip(*(iter(init_list),) * children_list_len)
+    end_list = [list(i) for i in list_of_groups]
+    count = len(init_list) % children_list_len
+    end_list.append(init_list[-count:]) if count != 0 else end_list
+    return end_list
+
 @app.route('/calculation',methods=["POST"])
 def point_calculate():
     get_data=request.data.decode('utf-8')
-
     # 获取传入的json，转化为计算用的坐标列表
-    get_data = json.loads(get_data)
-    point_list = point_lists_change(point_datas,get_data)
 
-    print(point_list)
+    filename = os.path.join(file_path,'test.txt')
+    Notes = open(filename,mode='a')
+    Notes.write(get_data)
+    Notes.write('\n')
+    Notes.close()
+
+    get_data = json.loads(get_data)
 
     # 将计算用的坐标传入函数中计算坐标值并返回
-    points= np.array(point_list).reshape(1, -1)
-    point_lists = ble_predict(points)[0]
+    
+    ble=Ble()
+    position_x, position_y,ID = ble.run(get_data)
+    location_dict = {"x":float(position_x),"y":float(position_y),"board":str(ID)}
+    return  jsonify(location_dict)
 
-    board = displayboard(point_lists)
+@app.route('/test',methods=["GET","POST"])
+def test_point():
+    USERS = {
+    1:{'name':'derek','age':18},
+    2:{'name':'tom','age':20},
+    3:{'name':'杰克','age':22},
+    }
+    data = json.dumps(USERS,ensure_ascii=False)
+    with codecs.open(os.path.join(file_path,'data.json'),'w',encoding='utf-8') as fp:
+        json.dump(USERS,fp,ensure_ascii=False)
+    fp.close()
+    print(__name__)
+    return jsonify(USERS)
 
-    test_dict = {"x":float(point_lists[0]),"y":float(point_lists[1]),"board":str(board)}
+@app.route('/redirecttest',methods=["GET","POST"])
+def redirectpoint():
 
-    return  jsonify(test_dict)
+    headers = {"location":"http://www.baidu.com"}
 
-@app.route('/worker',methods=["POST"])
-def point_worker():
-    get_data=request.data.decode('utf-8')
-    get_data = json.loads(get_data)
-    worker = main.Worker()
-    position = worker.Run(get_data)
+    return '<html></html>',301,headers
 
-    return jsonify(position)
+
